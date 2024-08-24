@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Enter city name" id="cityInput">
+            <button id="searchButton"><img src="images/search.png" alt="Search"></button>
+        </div>
+
+        <div class="weather">
+            <img src="images/default.png" class="wicon" alt="Weather Icon">
+            <h1 class="temp">--°C</h1>
+            <h2 class="city" id="city">City Name</h2>
+            <div class="details">
+                <div class="col">
+                    <img src="images/humidity.png" alt="Humidity Icon">
+                    <div>
+                        <p class="humidity">--%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="images/wind.png" alt="Wind Icon">
+                    <div>
+                        <p class="wind">-- km/h</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <script>
+        const apikey = "bdf28e9361874ed06363925991b4a370";
+        const apiurl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+        const wicon = document.querySelector('.wicon');
+
+        const weatherIcons = {
+            Clouds: "images/cloud.png",
+            Clear: "images/clear.png",
+            Rain: "images/rain.png",
+            Drizzle: "images/drizzle.png",
+            Mist: "images/mist.png",
+            Haze: "images/haze.png",
+            Default: "images/default.png"  // Ensure this image exists
+        };
+
+        function updateWeatherIcon(weatherMain) {
+            const iconPath = weatherIcons[weatherMain] || weatherIcons.Default;
+            wicon.src = iconPath;
+        }
+
+        async function checkWeather(city) {
+            try {
+                const response = await fetch(`${apiurl}${city}&appid=${apikey}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log(data);
+
+                document.querySelector('.city').innerHTML = data.name;
+                document.querySelector('.temp').innerHTML = `${Math.round(data.main.temp)}°C`;
+                document.querySelector('.humidity').innerHTML = `${data.main.humidity}%`;
+                document.querySelector('.wind').innerHTML = `${data.wind.speed} km/h`;
+  
+                if (data.weather && data.weather[0]) {
+                    updateWeatherIcon(data.weather[0].main);
+                }
+            } catch (error) {
+                console.error("Error fetching weather data:", error);
+            }
+        }
+
+        document.getElementById('searchButton').addEventListener('click', () => {
+            const city = document.getElementById('cityInput').value;
+            if (city) {
+                checkWeather(city);
+            } else {
+                alert('Please enter a city name');
+            }
+        });
+
+        checkWeather("London");
+    </script>
+
+</body>
+</html>
